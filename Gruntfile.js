@@ -122,7 +122,8 @@ module.exports = function (grunt) {
     jshint: {
       options: {
         jshintrc: '.jshintrc',
-        reporter: require('jshint-stylish')
+        reporter: require('jshint-stylish'),
+        force: true
       },
       all: {
         src: [
@@ -202,23 +203,23 @@ module.exports = function (grunt) {
     wiredep: {
       app: {
         src: ['<%= yeoman.app %>/index.html'],
-        ignorePath:  /\.\.\//
+        ignorePath: /\.\.\//
       },
       test: {
         devDependencies: true,
         src: '<%= karma.unit.configFile %>',
-        ignorePath:  /\.\.\//,
-        fileTypes:{
+        ignorePath: /\.\.\//,
+        fileTypes: {
           js: {
             block: /(([\s\t]*)\/{2}\s*?bower:\s*?(\S*))(\n|\r|.)*?(\/{2}\s*endbower)/gi,
-              detect: {
-                js: /'(.*\.js)'/gi
-              },
-              replace: {
-                js: '\'{{filePath}}\','
-              }
+            detect: {
+              js: /'(.*\.js)'/gi
+            },
+            replace: {
+              js: '\'{{filePath}}\','
             }
           }
+        }
       }
     },
 
@@ -274,27 +275,27 @@ module.exports = function (grunt) {
     // By default, your `index.html`'s <!-- Usemin block --> will take care of
     // minification. These next options are pre-configured if you do not wish
     // to use the Usemin blocks.
-    // cssmin: {
-    //   dist: {
-    //     files: {
-    //       '<%= yeoman.dist %>/styles/main.css': [
-    //         '.tmp/styles/{,*/}*.css'
-    //       ]
-    //     }
-    //   }
-    // },
-    // uglify: {
-    //   dist: {
-    //     files: {
-    //       '<%= yeoman.dist %>/scripts/scripts.js': [
-    //         '<%= yeoman.dist %>/scripts/scripts.js'
-    //       ]
-    //     }
-    //   }
-    // },
-    // concat: {
-    //   dist: {}
-    // },
+    cssmin: {
+      dist: {
+        files: {
+          '<%= yeoman.dist %>/styles/main.css': [
+            '.tmp/styles/{,*/}*.css'
+          ]
+        }
+      }
+    },
+    uglify: {
+      dist: {
+        files: {
+          '<%= yeoman.app %>/scripts/app.ugly.js': [
+            '<%= yeoman.app %>/scripts/app.js'
+          ]
+        }
+      }
+    },
+    concat: {
+      dist: {}
+    },
 
     // imagemin: {
     //   dist: {
@@ -315,24 +316,6 @@ module.exports = function (grunt) {
           src: '{,*/}*.svg',
           dest: '<%= yeoman.dist %>/images'
         }]
-      }
-    },
-    complexity: {
-      generic: {
-        src: ['grunt.js', 'tasks/grunt-complexity.js'],
-        exclude: ['doNotTest.js'],
-        options: {
-          breakOnErrors: true,
-          jsLintXML: 'report.xml',         // create XML JSLint-like report
-          checkstyleXML: 'checkstyle.xml', // create checkstyle report
-          pmdXML: 'pmd.xml',               // create pmd report
-          errorsOnly: false,               // show only maintainability errors
-          cyclomatic: [3, 7, 12],          // or optionally a single value, like 3
-          halstead: [8, 13, 20],           // or optionally a single value, like 8
-          maintainability: 100,
-          hideComplexFunctions: false,     // only display maintainability
-          broadcast: false                 // broadcast data over event-bus
-        }
       }
     },
     htmlmin: {
@@ -440,9 +423,62 @@ module.exports = function (grunt) {
         configFile: 'test/karma.conf.js',
         singleRun: true
       }
+    },
+    complexity: {
+      js: {
+        expand: true,
+        cwd: '<%= yeoman.app %>/',
+        src: ['production/*.js', '*.js'],
+        options: {
+          breakOnErrors: true,
+          jsLintXML: 'complexity/report.xml',         // create XML JSLint-like report
+          checkstyleXML: 'complexity/checkstyle.xml', // create checkstyle report
+          pmdXML: 'complexity/pmd.xml',               // create pmd report
+          errorsOnly: false,               // show only maintainability errors
+          cyclomatic: [3, 7, 12],          // or optionally a single value, like 3
+          halstead: [8, 13, 20],           // or optionally a single value, like 8
+          maintainability: 100,
+          hideComplexFunctions: false,     // only display maintainability
+          broadcast: false
+        }
+      }
+    },
+    jsdoc : {
+      dist : {
+        src: ['app/**/*.js'],
+        options: {
+          destination: 'doc'
+        }
+      }
+    },
+    csslint: {
+      options: {
+        csslintrc: '.csslintrc',
+        formatters: [
+          {id: require('csslint-stylish'), dest: 'report/csslint_stylish.xml'}
+        ]
+      },
+      strict: {
+        options: {
+          import: 2
+        },
+        src: ['app/styles/**/*.css']
+      }
+    },
+    sasslint: {
+      options: {
+        configFile: '.sass-lint.yml',
+        formatter: 'html',
+        outputFile: 'report-sass-lint/report.html'
+      },
+      target: ['app/styles/**/*.scss']
     }
   });
-
+  grunt.loadNpmTasks('grunt-sass-lint');
+  grunt.loadNpmTasks('grunt-contrib-csslint');
+  grunt.loadNpmTasks('grunt-jsdoc');
+  grunt.loadNpmTasks('grunt-complexity');
+  grunt.registerTask('complx', 'complexity');
 
   grunt.registerTask('serve', 'Compile then start a connect web server', function (target) {
     if (target === 'dist') {
@@ -494,8 +530,7 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     'newer:jshint',
     'newer:jscs',
-    'test',
-    'build'
+    // 'test',
+    // 'build'
   ]);
-  grunt.registerTask('complexity', 'complexity');
 };
