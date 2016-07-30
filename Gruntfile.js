@@ -66,7 +66,6 @@ module.exports = function (grunt) {
         ]
       }
     },
-
     // The actual grunt server settings
     connect: {
       options: {
@@ -416,14 +415,6 @@ module.exports = function (grunt) {
         'svgmin'
       ]
     },
-
-    // Test settings
-    karma: {
-      unit: {
-        configFile: 'test/karma.conf.js',
-        singleRun: true
-      }
-    },
     complexity: {
       js: {
         expand: true,
@@ -472,8 +463,18 @@ module.exports = function (grunt) {
         outputFile: 'report-sass-lint/report.html'
       },
       target: ['app/styles/**/*.scss']
+    },
+    karma: {
+      unit: {
+        configFile: 'karma.conf.js',
+        port: 9999,
+        singleRun: true,
+        browsers: ['PhantomJS'],
+        logLevel: 'ERROR'
+      }
     }
   });
+  grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-sass-lint');
   grunt.loadNpmTasks('grunt-contrib-csslint');
   grunt.loadNpmTasks('grunt-jsdoc');
@@ -493,11 +494,6 @@ module.exports = function (grunt) {
       'connect:livereload',
       'watch'
     ]);
-  });
-
-  grunt.registerTask('server', 'DEPRECATED TASK. Use the "serve" task instead', function (target) {
-    grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
-    grunt.task.run(['serve:' + target]);
   });
 
   grunt.registerTask('test', [
